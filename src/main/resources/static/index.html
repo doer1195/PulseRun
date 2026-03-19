@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PulseRun | Binance Style Chart</title>
+    <!-- 라이브러리 로드: TradingView Chart(v4.1.1 고정), STOMP -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        /* 바이낸스 다크 모드 테마 */
+        body {
+            background-color: #0b0e11;
+            color: #eaecef;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .info-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            background: #181a20;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        #coin-title { font-size: 24px; font-weight: bold; color: #f0b90b; } /* 바이낸스 옐로우 */
+        #current-price { font-size: 20px; color: #2ebd85; }
+        #chart-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #0b0e11;
+        }
+    </style>
+</head>
+<body>
+
+<div class="info-container">
+    <div id="coin-title">BTC / KRW</div>
+    <div>현재가: <span id="current-price">0</span>원</div>
+</div>
+
+<div id="chart-container"></div>
+
+<script>
+    const market = "KRW-BTC";
+    const container = document.getElementById('chart-container');
+
+    // 1. 차트 인스턴스 생성 (바이낸스 스타일 옵션)
+    const chart = LightweightCharts.createChart(container, {
+        layout: {
+            background: { color: '#0b0e11' },
+            textColor: '#848e9c',
+            fontSize: 12,
+        },
+        grid: {
+            vertLines: { color: '#1f2229' },
+            horzLines: { color: '#1f2229' },
+        },
+        crosshair: {
+            mode: LightweightCharts.CrosshairMode.Normal,
+            vertLine: { width: 1, color: '#707a8a', style: LightweightCharts.LineStyle.Dashed },
+            horzLine: { width: 1, color: '#707a8a', style: LightweightCharts.LineStyle.Dashed },
+        },
+        rightPriceScale: {
+            borderColor: '#2b2f3a',
+            autoScale: true,
+        },
+        timeScale: {
+            borderColor: '#2b2f3a',
+            timeVisible: true,
+            secondsVisible: false,
+        },
+    });
+
+    // 2. 캔들스틱 시리즈 (바이낸스 그린/레드)
+    const candleSeries = chart.addCandlestickSeries({
+        upColor: '#2ebd85',
+        downColor: '#f6465d',
+        borderVisible: false,
+        wickUpColor: '#2ebd85',
+        wickDownColor: '#f6465d',
+    });
+
+    // 3. 거래량 시리즈 (하단 배치)
+    const volumeSeries = chart.addHistogramSeries({
+        color: '#26a69a',
+        priceFormat: { type: 'volume' },
+        priceScaleId: '', // 별도 스케일 사용
+    });
+
+    // 거래량 스케일 위치 조정 (하단 20%만 차지하게)
+    chart.priceScale('').applyOptions({
+        scaleMargins: {
+            top: 0.8,
+            bottom: 0,
+        },
+    });
+
+    // 4. 초기 데이터 로딩 (REST API)
+    async function loadHistory() {
+        try {
+            const response = await fetch(`/api/ticker/candles?market=${market}&count=200`);
+            const data = await response.json();
+
+            // 시간순 정렬 및 데이터 매핑
+            const formattedData = data.map(c => ({
+                time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
+                open: c.opening_price,
+                high: c.high_price,
+                low: c.low_price,
+                close: c.trade_price
+            })).sort((a, b) => a.time - b.time);
+
+            const volumeData = data.map(c => ({
+                time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
+                value: c.candle_acc_trade_volume,
+                color: c.opening_price <= c.trade_price ? 'rgba(46, 189, 133, 0.5)' : 'rgba(246, 70, 93, 0.5)'
+            })).sort((a, b) => a.time - b.time);
+
+            candleSeries.setData(formattedData);
+            volumeSeries.setData(volumeData);
+        } catch (e) {
+            console.error("데이터 로딩 실패:", e);
+        }
+    }
+
+    // 5. 실시간 데이터 연결 (STOMP)
+    function connectSocket() {
+        const socket = new WebSocket('ws://localhost:8080/ws-pulse');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null; // 디버그 로그 숨김
+
+        stompClient.connect({}, function () {
+            stompClient.subscribe('/topic/tickers', function (tick) {
+                const data = JSON.parse(tick.body);
+
+                if (data.code === market) {
+                    // 상단 현재가 텍스트 업데이트
+                    const priceElement = document.getElementById('current-price');
+                    priceElement.innerText = data.trade_price.toLocaleString();
+                    priceElement.style.color = data.ask_bid === 'ASK' ? '#f6465d' : '#2ebd85';
+
+                    // 1분봉 시간 계산
+                    const now = Math.floor(Date.now() / 1000);
+                    const candleTime = now - (now % 60);
+
+                    // 차트 캔들 업데이트
+                    candleSeries.update({
+                        time: candleTime,
+                        open: data.opening_price,
+                        high: data.high_price,
+                        low: data.low_price,
+                        close: data.trade_price
+                    });
+
+                    // 거래량 업데이트 (실시간 거래량 시각화)
+                    volumeSeries.update({
+                        time: candleTime,
+                        value: data.acc_trade_volume_24h, // 24시간 누적이지만 실시간 변화 확인용
+                        color: data.opening_price <= data.trade_price ? 'rgba(46, 189, 133, 0.5)' : 'rgba(246, 70, 93, 0.5)'
+                    });
+                }
+            });
+        });
+    }
+
+    // 창 크기 조절 대응
+    window.addEventListener('resize', () => {
+        chart.applyOptions({ width: container.clientWidth });
+    });
+
+    // 실행 시작
+    loadHistory().then(connectSocket);
+</script>
+</body>
+</html>
