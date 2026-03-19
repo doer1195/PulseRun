@@ -2,6 +2,7 @@ package com.pulserun.market;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,4 +20,10 @@ public class Market {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Builder
+    public Market(String code, String name) {
+        this.code = code;
+        this.name = name;
+    }
 }
