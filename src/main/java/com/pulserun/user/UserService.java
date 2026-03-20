@@ -1,5 +1,6 @@
 package com.pulserun.user;
 
+import com.pulserun.utils.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,15 +35,6 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final RestClient restClient = RestClient.create();
 
-    User findByProviderAndProviderId(String provider, String providerId) {
-        var it = userRepository.findByProviderAndProviderId(provider, providerId);
-        if (it.isEmpty()) {
-            throw new EntityNotFoundException("User not found");
-        }
-        return it.get();
-    }
-
-
     public String processSocialLogin(String provider, String code) {
         Map<String, Object> googleResponse = getGoogleTokenResponse(code);
         String idToken = (String) googleResponse.get("id_token");
@@ -73,7 +65,7 @@ public class UserService {
                                 .build();
                         return userRepository.save(newUser);
                     });
-            String ourToken = jwtUtil.generateToken(user.getProviderId());
+            String ourToken = jwtUtil.createToken(user.getId());
 
             log.info("자체 JWT 발급 완료: {}", ourToken);
 
