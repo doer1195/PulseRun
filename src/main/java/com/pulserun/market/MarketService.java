@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class MarketService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final MarketRepository marketRepository;
-    private final RestClient restClient = RestClient.create(); // 최신 API 통신 객체
+    private final RestClient restClient = RestClient.create();
 
     @PostConstruct
     @Transactional
