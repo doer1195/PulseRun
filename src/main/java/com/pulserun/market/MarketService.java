@@ -30,7 +30,8 @@ public class MarketService {
         List<UpbitMarketDto> upbitMarkets = restClient.get()
                 .uri("https://api.upbit.com/v1/market/all?isDetails=false")
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
 
         if (upbitMarkets == null || upbitMarkets.isEmpty()) {
             log.warn("⚠️ 업비트에서 데이터를 가져오지 못했습니다.");

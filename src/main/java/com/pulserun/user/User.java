@@ -14,7 +14,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "provider", nullable = false)
     private String provider;
     @Column(name = "provider_id", nullable = false)
@@ -32,5 +31,4 @@ public class User {
         this.email = email;
         this.nickname = nickname;
     }
-
 }

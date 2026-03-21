@@ -1,10 +1,11 @@
 package com.pulserun.user;
 
+import com.pulserun.global.error.ErrorCode;
+import com.pulserun.global.error.exception.BusinessException;
 import com.pulserun.utils.JwtUtil;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -70,9 +71,8 @@ public class UserService {
             log.info("자체 JWT 발급 완료: {}", ourToken);
 
             return ourToken;
-
         } catch (Exception e) {
-            throw new RuntimeException("token error", e);
+            throw new BusinessException(ErrorCode.TOKEN_PARSE_ERROR, e);
         }
     }
 

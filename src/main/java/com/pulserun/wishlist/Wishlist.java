@@ -1,6 +1,5 @@
 package com.pulserun.wishlist;
 
-
 import com.pulserun.market.Market;
 import com.pulserun.user.User;
 import jakarta.persistence.*;
@@ -40,5 +39,4 @@ public class Wishlist {
         this.market = market;
         this.createdAt = LocalDateTime.now(); // 찜한 시간 자동 저장
     }
-
 }

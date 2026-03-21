@@ -1,6 +1,5 @@
 package com.pulserun.notification;
 
-
 import com.pulserun.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -44,5 +43,4 @@ public class Notification {
         this.user = user;
         this.message = message;
     }
-
 }

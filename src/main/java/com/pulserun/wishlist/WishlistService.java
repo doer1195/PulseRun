@@ -4,7 +4,6 @@ import com.pulserun.market.Market;
 import com.pulserun.market.MarketRepository;
 import com.pulserun.user.User;
 import com.pulserun.user.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

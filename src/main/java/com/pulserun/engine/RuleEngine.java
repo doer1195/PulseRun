@@ -21,12 +21,12 @@ public class RuleEngine {
     @Transactional(readOnly = true)
     public void evaluate(String symbol, Double currentPrice) {
         List<Rule> activeRules = ruleRepository.findAllBySymbolAndIsActiveTrue(symbol);
-        log.info("[RuleEngine] Evaluating {} rules for symbol: {}, Current Price: {}", activeRules.size(), symbol, currentPrice);
+        log.info("[RuleEngine] Evaluating {} rules for symbol: {}, Current Price: {}", activeRules.size(), symbol,
+                currentPrice);
 
         if (activeRules.isEmpty()) {
             return;
         }
-
 
         for (Rule rule : activeRules) {
             try {
@@ -48,6 +48,5 @@ public class RuleEngine {
         );
 
         log.info("[RuleEngine] Notification triggered for User: {}, Rule ID: {}", rule.getUser().getId(), rule.getId());
-
     }
 }

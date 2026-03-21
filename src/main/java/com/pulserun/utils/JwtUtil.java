@@ -60,7 +60,6 @@ public class JwtUtil {
         return false;
     }
 
-
     public String getProviderId(String token) {
         return Jwts.parser()
                 .verifyWith(this.secretKey)

@@ -17,7 +17,8 @@ public class RuleService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void createSimpleRule(Long userId, String symbol, String indicatorType, Double targetValue, String condition) {
+    public void createSimpleRule(Long userId, String symbol, String indicatorType, Double targetValue,
+                                 String condition) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 

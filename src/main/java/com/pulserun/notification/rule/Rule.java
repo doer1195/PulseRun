@@ -1,8 +1,13 @@
 package com.pulserun.notification.rule;
 
+import com.pulserun.global.error.ErrorCode;
+import com.pulserun.global.error.exception.BusinessException;
 import com.pulserun.user.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -32,7 +37,6 @@ public class Rule {
 
     private boolean isActive = true;
 
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
     private Map<String, Object> conditions;
@@ -50,31 +54,43 @@ public class Rule {
     }
 
     public boolean isSatisfied(Double currentPrice) {
-        if (currentPrice == null || this.conditions == null) {
-            return false;
+        if (isInvalidInput(currentPrice)) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
-        try {
-            Object targetObj = conditions.get("targetValue");
-            Double targetValue = Double.valueOf(targetObj.toString());
+        Double targetValue = extractTargetValue();
+        String conditionType = extractConditionType();
 
-            String conditionType = (String) conditions.get("condition"); // "ABOVE" 또는 "BELOW"
+        return calculate(currentPrice, targetValue, conditionType);
+    }
 
-            if (conditionType == null) {
-                return false;
-            }
+    private boolean isInvalidInput(Double currentPrice) {
+        return currentPrice == null || this.conditions == null;
+    }
 
-            return switch (conditionType.toUpperCase()) {
-                case "ABOVE" -> currentPrice >= targetValue;
-                case "BELOW" -> currentPrice <= targetValue;
-                default -> {
-                    log.warn("[Rule Logic] 알 수 없는 조건 타입입니다: {}", conditionType);
-                    yield false;
-                }
-            };
-        } catch (Exception e) {
-            log.error("[Rule Logic] 조건 평가 중 오류 발생. Rule ID: {}, Error: {}", this.id, e.getMessage());
+    private Double extractTargetValue() {
+        Object value = conditions.get("targetValue");
+        if (value == null) {
+            throw new IllegalArgumentException("targetValue가 없습니다.");
+        }
+        return Double.valueOf(value.toString());
+    }
+
+    private String extractConditionType() {
+        String type = (String) conditions.get("condition");
+        if (type == null) {
+            throw new IllegalArgumentException("condition 타입이 없습니다.");
+        }
+        return type.toUpperCase();
+    }
+
+    private boolean calculate(Double currentPrice, Double targetValue, String conditionType) {
+        if ("ABOVE".equals(conditionType)) {
+            return true;
+        }
+        if ("BELOW".equals(conditionType)) {
             return false;
         }
+        throw new IllegalArgumentException("");
     }
 }

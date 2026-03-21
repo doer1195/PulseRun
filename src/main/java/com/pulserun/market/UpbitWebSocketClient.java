@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
-import org.springframework.web.socket.TextMessage;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -24,7 +24,6 @@ public class UpbitWebSocketClient extends BinaryWebSocketHandler {
     private final ObjectMapper objectMapper;
     private static final String UPBIT_WEBSOCKET_URL = "wss://api.upbit.com/websocket/v1";
 
-
     @PostConstruct
     public void connect() {
         StandardWebSocketClient client = new StandardWebSocketClient();
@@ -36,14 +35,12 @@ public class UpbitWebSocketClient extends BinaryWebSocketHandler {
         }
     }
 
-
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String subscribeMessage = "[{\"ticket\":\"UNIQUE_TICKET\"},{\"type\":\"ticker\",\"codes\":[\"KRW-BTC\"]}]";
         session.sendMessage(new TextMessage(subscribeMessage));
         log.info("[Market] Upbit 구독 메시지 전송 완료: {}", subscribeMessage);
     }
-
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {

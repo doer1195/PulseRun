@@ -19,6 +19,4 @@ public class UserController {
         String token = userService.processSocialLogin(provider, request.code());
         return ResponseEntity.ok(token);
     }
-
-
 }
