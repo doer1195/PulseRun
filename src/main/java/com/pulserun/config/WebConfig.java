@@ -1,6 +1,5 @@
 package com.pulserun.config;
 
-import com.pulserun.config.LoginUserArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
