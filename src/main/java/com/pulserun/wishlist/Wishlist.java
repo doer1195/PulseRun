@@ -1,7 +1,9 @@
 package com.pulserun.wishlist;
 
-import com.pulserun.market.Market;
-import com.pulserun.user.User;
+import com.pulserun.global.error.ErrorCode;
+import com.pulserun.global.utils.Asserts;
+import com.pulserun.market.entity.Market;
+import com.pulserun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Wishlist {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,8 +38,11 @@ public class Wishlist {
 
     @Builder
     public Wishlist(User user, Market market) {
+        Asserts.notNull(user, ErrorCode.DATA_IS_NULL, "user");
+        Asserts.notNull(market, ErrorCode.DATA_IS_NULL, "market");
+
         this.user = user;
         this.market = market;
-        this.createdAt = LocalDateTime.now(); // 찜한 시간 자동 저장
+        this.createdAt = LocalDateTime.now();
     }
 }
