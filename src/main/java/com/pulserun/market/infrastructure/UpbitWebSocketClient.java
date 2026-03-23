@@ -1,9 +1,10 @@
-package com.pulserun.market;
+package com.pulserun.market.infrastructure;
 
-import com.pulserun.engine.RuleEngine;
+import com.pulserun.market.dto.PriceChangedEvent;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
@@ -20,9 +21,9 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class UpbitWebSocketClient extends BinaryWebSocketHandler {
 
-    private final RuleEngine ruleEngine;
-    private final ObjectMapper objectMapper;
     private static final String UPBIT_WEBSOCKET_URL = "wss://api.upbit.com/websocket/v1";
+    private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @PostConstruct
     public void connect() {
@@ -54,7 +55,7 @@ public class UpbitWebSocketClient extends BinaryWebSocketHandler {
 
                 log.debug("[Market] Received: {} / {}", symbol, currentPrice);
 
-                ruleEngine.evaluate(symbol, currentPrice);
+                applicationEventPublisher.publishEvent(new PriceChangedEvent(symbol, currentPrice));
             }
         } catch (Exception e) {
             log.error("[Market] 데이터 처리 중 예외 발생: {}", e.getMessage());
