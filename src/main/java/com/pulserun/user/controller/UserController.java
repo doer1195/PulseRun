@@ -1,5 +1,7 @@
-package com.pulserun.user;
+package com.pulserun.user.controller;
 
+import com.pulserun.user.service.UserService;
+import com.pulserun.user.dto.OauthLoginRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,6 +1,6 @@
-package com.pulserun.config;
+package com.pulserun.global.auth;
 
-import com.pulserun.utils.JwtUtil;
+import com.pulserun.global.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

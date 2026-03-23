@@ -1,6 +1,10 @@
-package com.pulserun.notification;
+package com.pulserun.notification.history.controller;
 
-import com.pulserun.user.LoginUser;
+import com.pulserun.notification.history.service.NotificationService;
+import com.pulserun.notification.history.dto.NotificationResponseDto;
+import com.pulserun.notification.history.dto.UnreadCountResponseDto;
+import com.pulserun.notification.history.entity.Notification;
+import com.pulserun.global.auth.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,7 +21,8 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<Slice<NotificationResponseDto>> getMyNotifications(
             @LoginUser Long userId,
-            Pageable pageable) {
+            Pageable pageable
+    ) {
 
         Slice<Notification> notifications = notificationService.getMyNotifications(userId, pageable);
 
@@ -35,9 +40,14 @@ public class NotificationController {
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<Void> readNotification(
             @PathVariable Long notificationId,
-            @LoginUser Long userId) {
+            @LoginUser Long userId
+    ) {
 
-        notificationService.readNotification(notificationId, userId);
+        notificationService.readNotification(
+                notificationId,
+                userId
+        );
+
         return ResponseEntity.ok().build();
     }
 }

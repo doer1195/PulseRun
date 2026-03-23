@@ -1,4 +1,4 @@
-package com.pulserun.utils;
+package com.pulserun.global.utils;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,21 +32,21 @@ public class JwtUtil {
         Date expiryDate = new Date(now.getTime() + expirationTime);
 
         return Jwts.builder()
-                .subject(String.valueOf(userId))
-                .issuedAt(new Date())
-                .expiration(expiryDate)
-                .signWith(this.secretKey)
-                .compact();
+                   .subject(String.valueOf(userId))
+                   .issuedAt(new Date())
+                   .expiration(expiryDate)
+                   .signWith(this.secretKey)
+                   .compact();
     }
 
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                    .verifyWith(this.secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
+                .verifyWith(this.secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());
@@ -62,10 +62,10 @@ public class JwtUtil {
 
     public String getProviderId(String token) {
         return Jwts.parser()
-                .verifyWith(this.secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+                   .verifyWith(this.secretKey)
+                   .build()
+                   .parseSignedClaims(token)
+                   .getPayload()
+                   .getSubject();
     }
 }

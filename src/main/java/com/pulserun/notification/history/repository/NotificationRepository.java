@@ -1,5 +1,6 @@
-package com.pulserun.notification;
+package com.pulserun.notification.history.repository;
 
+import com.pulserun.notification.history.entity.Notification;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

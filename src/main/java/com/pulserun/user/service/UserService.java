@@ -1,8 +1,10 @@
-package com.pulserun.user;
+package com.pulserun.user.service;
 
 import com.pulserun.global.error.ErrorCode;
-import com.pulserun.global.error.exception.BusinessException;
-import com.pulserun.utils.JwtUtil;
+    import com.pulserun.global.error.exception.PulserunException;
+import com.pulserun.global.utils.JwtUtil;
+import com.pulserun.user.entity.User;
+import com.pulserun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,23 +58,23 @@ public class UserService {
             log.info("고유번호: {}, 이메일: {}, 이름: {}", providerId, email, name);
 
             User user = userRepository.findByProviderAndProviderId(provider, providerId)
-                    .orElseGet(() -> {
-                        log.info("new user added");
-                        User newUser = User.builder()
-                                .provider(provider)
-                                .providerId(providerId)
-                                .email(email)
-                                .nickname(name)
-                                .build();
-                        return userRepository.save(newUser);
-                    });
+                                      .orElseGet(() -> {
+                                          log.info("new user added");
+                                          User newUser = User.builder()
+                                                             .provider(provider)
+                                                             .providerId(providerId)
+                                                             .email(email)
+                                                             .nickname(name)
+                                                             .build();
+                                          return userRepository.save(newUser);
+                                      });
             String ourToken = jwtUtil.createToken(user.getId());
 
             log.info("자체 JWT 발급 완료: {}", ourToken);
 
             return ourToken;
         } catch (Exception e) {
-            throw new BusinessException(ErrorCode.TOKEN_PARSE_ERROR, e);
+            throw new PulserunException(ErrorCode.TOKEN_PARSE_ERROR, e);
         }
     }
 
@@ -87,12 +89,12 @@ public class UserService {
         params.add("code", code);
 
         return restClient.post()
-                .uri(tokenUri)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(params)
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
+                         .uri(tokenUri)
+                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                         .body(params)
+                         .retrieve()
+                         .body(new ParameterizedTypeReference<>() {
+                         });
     }
 }
 

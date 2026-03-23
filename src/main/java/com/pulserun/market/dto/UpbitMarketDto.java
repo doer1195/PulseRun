@@ -1,4 +1,4 @@
-package com.pulserun.market;
+package com.pulserun.market.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

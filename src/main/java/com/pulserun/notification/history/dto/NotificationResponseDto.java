@@ -1,4 +1,6 @@
-package com.pulserun.notification;
+package com.pulserun.notification.history.dto;
+
+import com.pulserun.notification.history.entity.Notification;
 
 import java.time.LocalDateTime;
 
