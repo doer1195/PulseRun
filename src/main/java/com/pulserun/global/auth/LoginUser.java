@@ -1,4 +1,4 @@
-package com.pulserun.user;
+package com.pulserun.global.auth;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
