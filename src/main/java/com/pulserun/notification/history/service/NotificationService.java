@@ -1,7 +1,11 @@
-package com.pulserun.notification;
+package com.pulserun.notification.history.service;
 
-import com.pulserun.user.User;
-import com.pulserun.user.UserRepository;
+import com.pulserun.global.error.ErrorCode;
+import com.pulserun.global.error.exception.PulserunException;
+import com.pulserun.notification.history.entity.Notification;
+import com.pulserun.notification.history.repository.NotificationRepository;
+import com.pulserun.user.entity.User;
+import com.pulserun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -18,12 +22,12 @@ public class NotificationService {
     @Transactional
     public void createNotification(Long receiverId, String message) {
         User receiver = userRepository.findById(receiverId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다."));
+                                      .orElseThrow(() -> new PulserunException(ErrorCode.USER_NOT_FOUND));
 
         Notification notification = Notification.builder()
-                .user(receiver)
-                .message(message)
-                .build();
+                                                .user(receiver)
+                                                .message(message)
+                                                .build();
 
         notificationRepository.save(notification);
     }
@@ -41,12 +45,12 @@ public class NotificationService {
     @Transactional
     public void readNotification(Long notificationId, Long userId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림입니다."));
+                                                          .orElseThrow(() -> new PulserunException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
-        if (!notification.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("이 알림에 대한 권한이 없습니다.");
+        if (notification.getUser().getId().equals(userId)) {
+            notification.markAsRead();
         }
 
-        notification.markAsRead();
+        throw new PulserunException(ErrorCode.NOTIFICATION_NOT_ALLOWED);
     }
 }
