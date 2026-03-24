@@ -1,7 +1,7 @@
 package com.pulserun.wishlist;
 
-import com.pulserun.market.Market;
-import com.pulserun.user.User;
+import com.pulserun.market.entity.Market;
+import com.pulserun.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
